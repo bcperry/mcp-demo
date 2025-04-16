@@ -3,6 +3,19 @@
         "weather": {
             "type": "sse",
             "url": "http://localhost:8000/sse"
-        }
+        },
+        "sqlite": {
+            "command": "docker",
+            "args": [
+              "run",
+              "--rm",
+              "-i",
+              "--mount",
+              "type=bind,src=c:/Users/blaineperry/git/mcp-demo,dst=/mcp",
+              "mcp/sqlite",
+              "--db-path",
+              "/mcp/test.db"
+            ]
+          }
     }
 }

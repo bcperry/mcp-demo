@@ -9,7 +9,7 @@ We can't wait to see what you create with this MCP client! Happy coding! ðŸ’»ðŸ˜
 To run this project, use the following command:
 
 ```bash
-chainlit run app.py -p 8001
+chainlit run app.py --port 8001
 ```
 
 This will start the Chainlit application on port 8001.
