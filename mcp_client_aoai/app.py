@@ -10,7 +10,7 @@ import traceback
 from dotenv import load_dotenv
 load_dotenv("../.env")
 
-SYSTEM_PROMPT = "you are a helpful assistant."
+SYSTEM_PROMPT = "you are a helpful assistant, answering questions and providing information. You can also call tools to get more information or interact with an MCP server when needed. If you need to call a tool, please do so without asking the user.If you need to ask the user for more information, please do so.If you need to ask the user for confirmation, please do so.If you need to ask the user for a choice, please do so."
 
 class ChatClient:
     def __init__(self) -> None:
@@ -253,6 +253,7 @@ async def on_message(message: cl.Message):
     client.messages = cl.user_session.get("messages", [])
     
     msg = cl.Message(content="")
+    print(f"Tools: {tools}")
     async for text in client.generate_response(human_input=message.content, tools=tools):
         await msg.stream_token(text)
     

@@ -27,3 +27,5 @@ dist/
 *.iml
 .idea/
 *.ipynb_checkpoints
+
+*.db

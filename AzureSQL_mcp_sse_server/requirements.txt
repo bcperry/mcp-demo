@@ -1,0 +1,5 @@
+pyodbc
+fastapi[standard]
+uvicorn[standard]
+pydantic
+azure-identity
