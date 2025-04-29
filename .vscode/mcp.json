@@ -2,8 +2,12 @@
     "servers": {
         "azure_sql": {
             "type": "sse",
-            "url": "http://localhost:8000/mcp/sse"
+            "url": "http://localhost:8000/sse"
         },
+    //     "Azure MCP Server": {
+    //    "type": "sse",
+    //    "url": "http://localhost:5008/sse"
+    //  }
         // "sqlite_docker": {
         //     "command": "docker",
         //     "args": [
