@@ -1,33 +1,27 @@
 
-import sqlite3
 import logging
+import pyodbc
 from contextlib import closing
-from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger('mcp_sqlite_server')
-logger.info("Starting MCP SQLite Server")
+logger = logging.getLogger('mcp_sql_server')
+logger.info("Starting MCP SQL Server")
 
-class SqliteDatabase:
-    def __init__(self, db_path: str):
-        self.db_path = str(Path(db_path).expanduser())
-        Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
-        self._init_database()
-        self.insights: list[str] = []
 
-    def _init_database(self):
-        """Initialize connection to the SQLite database"""
-        logger.debug("Initializing database connection")
-        with closing(sqlite3.connect(self.db_path)) as conn:
-            conn.row_factory = sqlite3.Row
-            conn.close()
+class SqlDatabase:
+    def __init__(self, connection_string: str):
+        self.connection_string = connection_string
+
+    def get_conn(self):
+        conn = pyodbc.connect(self.connection_string)
+        return conn
+
 
     def _execute_query(self, query: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
         """Execute a SQL query and return results as a list of dictionaries"""
         logger.debug(f"Executing query: {query}")
         try:
-            with closing(sqlite3.connect(self.db_path)) as conn:
-                conn.row_factory = sqlite3.Row
+            with closing(self.get_conn()) as conn:
                 with closing(conn.cursor()) as cursor:
                     if params:
                         cursor.execute(query, params)
@@ -39,8 +33,8 @@ class SqliteDatabase:
                         affected = cursor.rowcount
                         logger.debug(f"Write query affected {affected} rows")
                         return [{"affected_rows": affected}]
-
-                    results = [dict(row) for row in cursor.fetchall()]
+                    columns = [column[0] for column in cursor.description]
+                    results = [dict(zip(columns, row)) for row in cursor.fetchall()]
                     logger.debug(f"Read query returned {len(results)} rows")
                     return results
         except Exception as e:

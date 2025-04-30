@@ -1,48 +1,44 @@
-from fastapi import FastAPI
+import os
 from pydantic import Field
-# import pyodbc, struct
-# from azure import identity
-from sse import create_sse_server
+from SqlDB import SqlDatabase
 from mcp.server.fastmcp import FastMCP
+import dotenv
+
+dotenv.load_dotenv(".env")
+
+connection_string = os.environ["AZURE_SQL_CONNECTIONSTRING"]
 
 
 # app = FastAPI()
 mcp = FastMCP("AzureSQL")
 
-from sqlite_db import SqliteDatabase
-db = SqliteDatabase("test.db")
-# def get_conn():
-#     credential = identity.DefaultAzureCredential(exclude_interactive_browser_credential=False)
-#     token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")
-#     token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
-#     SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
-#     conn = pyodbc.connect(connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct})
-#     return conn
-
-# # Mount the Starlette SSE server onto the FastAPI app
-# app.mount("/mcp/", create_sse_server(mcp), name="sse-mcp-server")
-
-
-# @app.get("/")
-# def read_root():
-#     return {"MCP": "SQL", "description": "This is a simple SQL MCP server."}
+# from sqlite_db import SqliteDatabase
+db = SqlDatabase(connection_string)
 
 
 @mcp.tool()
 async def list_tables() -> str:
     """List all tables in the SQL database"""
+
     query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'"
     results = db._execute_query(query)
     return str(results)
+
 @mcp.tool()
 async def describe_table(table_name: str = Field(description="Name of the table to describe")) -> str:
     """Get the schema information for a specific table"""
     if table_name is None:
         raise ValueError("Missing table_name argument")
     results = db._execute_query(
-        f"PRAGMA table_info({table_name})"
-    )
-    return str(results)
+        f"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE \
+        FROM INFORMATION_SCHEMA.COLUMNS \
+        WHERE TABLE_NAME = '{table_name}';"
+            )
+    
+    # convert the results to a dataframe
+    results_dict = [dict(zip(["COLUMN_NAME", "DATA_TYPE", "CHARACTER_MAXIMUM_LENGTH", "IS_NULLABLE"], row)) for row in results]
+
+    return str(results_dict)
 
 @mcp.tool()
 async def create_table(query: str = Field(description="CREATE TABLE SQL statement")) -> str:
@@ -67,6 +63,7 @@ async def read_query(query: str = Field(description="SELECT SQL query to execute
         raise ValueError("Only SELECT queries are allowed for read_query")
     results = db._execute_query(query)
     return str(results)
+
 
 if __name__ == "__main__":
     mcp.run(transport="sse")
