@@ -34,11 +34,7 @@ async def describe_table(table_name: str = Field(description="Name of the table 
         FROM INFORMATION_SCHEMA.COLUMNS \
         WHERE TABLE_NAME = '{table_name}';"
             )
-    
-    # convert the results to a dataframe
-    results_dict = [dict(zip(["COLUMN_NAME", "DATA_TYPE", "CHARACTER_MAXIMUM_LENGTH", "IS_NULLABLE"], row)) for row in results]
-
-    return str(results_dict)
+    return str(results)
 
 @mcp.tool()
 async def create_table(query: str = Field(description="CREATE TABLE SQL statement")) -> str:

@@ -3,4 +3,4 @@ dotenv
 fastapi[standard]
 uvicorn[standard]
 pydantic
-azure-identity
+mcp[cli]
