@@ -1,25 +1,23 @@
 {
     "servers": {
-        "azure_sql": {
-            "type": "sse",
-            "url": "http://localhost:8000/sse"
-        },
+        // "azure_sql": {
+        //     "type": "sse",
+        //     "url": "http://localhost:8000/sse"
+        // },
     //     "Azure MCP Server": {
     //    "type": "sse",
     //    "url": "http://localhost:5008/sse"
     //  }
-        // "sqlite_docker": {
-        //     "command": "docker",
-        //     "args": [
-        //       "run",
-        //       "--rm",
-        //       "-i",
-        //       "--mount",
-        //       "type=bind,src=c:/Users/blaineperry/git/mcp-demo,dst=/mcp",
-        //       "mcp/sqlite",
-        //       "--db-path",
-        //       "/mcp/test.db"
-        //     ]
-        //   }
+        "sqlite": {
+            "command": "uv",
+            "args": [
+              "--directory",
+              "C:/Users/blaineperry/git/servers/src/sqlite",
+              "run",
+              "mcp-server-sqlite",
+              "--db-path",
+              "C:/Users/blaineperry/git/mcp-demo/test.db"
+            ]
+          }
     }
 }
