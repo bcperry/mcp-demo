@@ -1,19 +1,10 @@
-from fastapi import FastAPI
 from typing import Any
 import httpx
-from sse import create_sse_server
 from mcp.server.fastmcp import FastMCP
 
-app = FastAPI()
-mcp = FastMCP("Echo")
+# app = FastAPI()
+mcp = FastMCP("Weather")
 
-# Mount the Starlette SSE server onto the FastAPI app
-app.mount("/", create_sse_server(mcp))
-
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
 
 
 # bare bones example of a FastAPI app with an sse MCP server
@@ -41,12 +32,12 @@ def format_alert(feature: dict) -> str:
     """Format an alert feature into a readable string."""
     props = feature["properties"]
     return f"""
-Event: {props.get('event', 'Unknown')}
-Area: {props.get('areaDesc', 'Unknown')}
-Severity: {props.get('severity', 'Unknown')}
-Description: {props.get('description', 'No description available')}
-Instructions: {props.get('instruction', 'No specific instructions provided')}
-"""
+    Event: {props.get('event', 'Unknown')}
+    Area: {props.get('areaDesc', 'Unknown')}
+    Severity: {props.get('severity', 'Unknown')}
+    Description: {props.get('description', 'No description available')}
+    Instructions: {props.get('instruction', 'No specific instructions provided')}
+    """
 
 @mcp.tool()
 async def get_alerts(state: str) -> str:
@@ -94,11 +85,15 @@ async def get_forecast(latitude: float, longitude: float) -> str:
     forecasts = []
     for period in periods[:5]:  # Only show next 5 periods
         forecast = f"""
-{period['name']}:
-Temperature: {period['temperature']}°{period['temperatureUnit']}
-Wind: {period['windSpeed']} {period['windDirection']}
-Forecast: {period['detailedForecast']}
-"""
+    {period['name']}:
+    Temperature: {period['temperature']}°{period['temperatureUnit']}
+    Wind: {period['windSpeed']} {period['windDirection']}
+    Forecast: {period['detailedForecast']}
+    """
         forecasts.append(forecast)
 
     return "\n---\n".join(forecasts)
+
+
+if __name__ == "__main__":
+    mcp.run(transport="sse")

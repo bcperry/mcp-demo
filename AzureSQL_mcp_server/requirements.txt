@@ -1,0 +1,6 @@
+pyodbc
+dotenv
+fastapi[standard]
+uvicorn[standard]
+pydantic
+mcp[cli]
